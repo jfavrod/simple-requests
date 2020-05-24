@@ -1,0 +1,31 @@
+{
+  "name": "simple-requests",
+  "version": "0.1.0",
+  "description": "A library for performing simple http(s) requests.",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "ts-mocha test/*.test.ts"
+  },
+  "keywords": [
+    "HTTP",
+    "HTTPS",
+    "REQUEST",
+    "SIMPLE",
+    "GET",
+    "PUT",
+    "POST",
+    "DELETE"
+  ],
+  "author": "Jason Favrod <mail@jasonfavrod.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.5",
+    "mocha": "^7.2.0",
+    "ts-mocha": "^7.0.0",
+    "typescript": "^3.9.3"
+  }
+}
