@@ -1,15 +1,23 @@
 import http, { IncomingMessage } from 'http';
 import https from 'https';
-import { IResponse } from './interfaces';
+import FormData from 'form-data';
+import { IRequestOptions, IResponse } from './interfaces';
 import { URL } from 'url';
 
-const endMethod = (incomming: http.IncomingMessage, data: string, response: IResponse, resolve: (response: IResponse) => any): void => {
-    response.headers = incomming.headers;
+const endMethod = (incoming: http.IncomingMessage, data: string, response: IResponse, resolve: (response: IResponse) => any): void => {
+    response.headers = incoming.headers;
 
     if (data) {
         // Convert response data to JSON if incoming content-type is JSON.
-        if (incomming.headers["content-type"] && new RegExp(/application\/json/i).test(incomming.headers["content-type"])) {
-            response.data = JSON.parse(data);
+        if (incoming.headers["content-type"] && new RegExp(/application\/json/i).test(incoming.headers["content-type"])) {
+            try {
+                response.data = JSON.parse(data);
+            }
+            catch (err) {
+                if (err instanceof SyntaxError) {
+                    response.data = data;
+                }
+            }
         }
         else {
             response.data = data;
@@ -59,19 +67,17 @@ export function get(url: string, options?: http.RequestOptions): Promise<IRespon
     return promise;
 }
 
-export function post(url: string, options?: http.RequestOptions): Promise<IResponse> {
+export function post(url: string, options?: IRequestOptions): Promise<IResponse> {
     const response = {} as IResponse;
 
-    let data: string;
+    let data = '';
     let module: any; // either http or https.
     let parsedUrl: URL;
     let promise: Promise<IResponse>;
 
-    options = options ? options : {};
+    options = options ? options : {} as IRequestOptions;
 
     parsedUrl = new URL(url);
-    console.log('url', url);
-    console.log('parsedUrl', parsedUrl);
     options = Object.assign(
         {
             host: parsedUrl.hostname,
@@ -81,7 +87,6 @@ export function post(url: string, options?: http.RequestOptions): Promise<IRespo
         },
         options,
     );
-    console.log('options', options);
 
     if (options!.port === 443) {
         module = https;
@@ -91,7 +96,7 @@ export function post(url: string, options?: http.RequestOptions): Promise<IRespo
     }
 
     promise = new Promise<IResponse>((resolve) => {
-        module.request(options, (res: IncomingMessage) => {
+        const req = module.request(options, (res: IncomingMessage) => {
             res.setEncoding('utf-8');
 
             res.on('data', (chunk: any) => {
@@ -100,6 +105,16 @@ export function post(url: string, options?: http.RequestOptions): Promise<IRespo
 
             res.on('end', () => endMethod(res, data, response, resolve));
         });
+
+        if (options?.data) {
+            if (options.data instanceof FormData) {
+                options.data.pipe(req);
+            }
+            else {
+                req.write(options.data);
+            }
+            req.end();
+        }
     });
 
     return promise;
