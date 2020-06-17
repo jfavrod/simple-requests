@@ -20,6 +20,10 @@
     "DELETE"
   ],
   "author": "Jason Favrod <mail@jasonfavrod.com>",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jfavrod/simple-requests.git"
+  },
   "license": "ISC",
   "devDependencies": {
     "@types/mocha": "^7.0.2",
