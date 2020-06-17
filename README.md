@@ -56,13 +56,41 @@ interface IResponse {
   },
   data: {
     args: { foo1: 'bar1', foo2: 'bar2' },
-    headers: {
-      'x-forwarded-proto': 'https',
-      'x-forwarded-port': '443',
-      host: 'postman-echo.com',
-      'x-amzn-trace-id': 'Root=1-5ecf3c1c-400b4810d8ccc7b015b0dc88'
-    },
-    url: 'https://postman-echo.com/get?foo1=bar1&foo2=bar2'
   }
 }
+```
+
+### POST Requests
+`post` requests are similar to `get` requests, with the addition of a
+`data` property to the `options` parameter.
+
+__Note: more about `data` parameter, including examples, will be added.__
+
+#### URL Encoded Form Data
+Sending URL encoded form data.
+
+```typescript
+// Requesting an OAuth 2 bearer token.
+  const data = querystring.stringify({
+      client_id: this.clientId,
+      client_secret: this.clientSecret,
+      grant_type: 'client_credentials'
+  });
+
+  // Make sure to set the correct Content-Type.
+  tmp = await post(this.oauthUrl, {
+      data,
+      headers: {
+          'Content-length': data.length,
+          'Content-type': 'application/x-www-form-urlencoded',
+      }
+  });
+
+  console.log('token', tmp.data);
+```
+
+**Output**
+```sh
+# OAuth 2 bearer token.
+zgBUCUQneGqAwz44ghwXe82i54CI
 ```
