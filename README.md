@@ -70,6 +70,8 @@ __Note: more about `data` parameter, including examples, will be added.__
 Sending URL encoded form data.
 
 ```typescript
+import querystring from 'querystring';
+
 // Requesting an OAuth 2 bearer token.
   const data = querystring.stringify({
       client_id: this.clientId,
