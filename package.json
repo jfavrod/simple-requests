@@ -11,7 +11,7 @@
     "clean": "rm -rf lib",
     "compile": "tsc",
     "lint": "tslint -p .",
-    "publish": "npm run build && npm publish",
+    "push": "npm run build && npm publish",
     "test": "ts-mocha test/*.test.ts"
   },
   "keywords": [
