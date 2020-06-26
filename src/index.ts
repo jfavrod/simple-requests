@@ -1,8 +1,17 @@
 import http, { IncomingMessage } from 'http';
 import https from 'https';
 import FormData from 'form-data';
-import { IRequestOptions, IResponse } from './interfaces';
 import { URL } from 'url';
+import { setPriority } from 'os';
+
+export interface IResponse {
+    data: any;
+    headers: http.IncomingHttpHeaders;
+}
+
+export interface IRequestOptions extends http.RequestOptions {
+    data: string | FormData;
+}
 
 // tslint:disable-next-line: max-line-length
 const endMethod = (incoming: http.IncomingMessage, data: string, response: IResponse, resolve: (response: IResponse) => any): void => {
@@ -79,19 +88,10 @@ export function post(url: string, options?: IRequestOptions): Promise<IResponse>
     let promise: Promise<IResponse>;
 
     options = options ? options : {} as IRequestOptions;
-
     parsedUrl = new URL(url);
-    options = Object.assign(
-        {
-            host: parsedUrl.hostname,
-            method: 'POST',
-            path: parsedUrl.pathname,
-            port: parsedUrl.protocol === 'https:' ? 443 : 80,
-        },
-        options,
-    );
+    setOptions('POST', parsedUrl, options);
 
-    if (options!.port === 443) {
+    if (options!.protocol === 'https:') {
         module = https;
     }
     else {
@@ -121,4 +121,65 @@ export function post(url: string, options?: IRequestOptions): Promise<IResponse>
     });
 
     return promise;
+}
+
+export function put(url: string, options: IRequestOptions) {
+    const response = {} as IResponse;
+
+    let data = '';
+    let module: any; // either http or https.
+    let parsedUrl: URL;
+    let promise: Promise<IResponse>;
+
+    options = options ? options : {} as IRequestOptions;
+    parsedUrl = new URL(url);
+    setOptions('PUT', parsedUrl, options);
+
+    if (options!.protocol === 'https:') {
+        module = https;
+    }
+    else {
+        module = http;
+    }
+
+    promise = new Promise<IResponse>((resolve) => {
+        const req = module.request(options, (res: IncomingMessage) => {
+            res.setEncoding('utf-8');
+
+            res.on('data', (chunk: any) => {
+                data += chunk;
+            });
+
+            res.on('end', () => endMethod(res, data, response, resolve));
+        });
+
+        if (options?.data) {
+            if (options.data instanceof FormData) {
+                options.data.pipe(req);
+            }
+            else {
+                req.write(options.data);
+            }
+            req.end();
+        }
+    });
+
+    return promise;
+}
+
+function setOptions(method: string, parsedUrl: URL, options: IRequestOptions) {
+    options.host = parsedUrl.hostname;
+    options.method = method;
+    options.path = parsedUrl.pathname;
+    options.protocol = parsedUrl.protocol;
+
+    if (parsedUrl.port) {
+        options.port = parsedUrl.port;
+    }
+    else if (parsedUrl.protocol === 'https:') {
+        options.port = 443;
+    }
+    else {
+        options.port = 80;
+    }
 }
