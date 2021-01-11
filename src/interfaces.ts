@@ -3,6 +3,7 @@ import FormData from 'form-data';
 
 export interface IResponse {
     data: any;
+    error?: boolean;
     headers: http.IncomingHttpHeaders;
 }
 

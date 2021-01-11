@@ -2,16 +2,19 @@ import http, { IncomingMessage } from 'http';
 import https from 'https';
 import FormData from 'form-data';
 import { URL } from 'url';
-import { setPriority } from 'os';
 
-export interface IResponse {
-    data: any;
-    headers: http.IncomingHttpHeaders;
-}
+import { IRequestOptions, IResponse } from './interfaces';
 
-export interface IRequestOptions extends http.RequestOptions {
-    data: string | FormData;
-}
+const rejectMessage = 'Unclassified error.'
+const rejectResponse: IResponse = {
+    data: rejectMessage,
+    error: true,
+    headers: {
+        date: new Date().toUTCString(),
+        'content-type': 'text/plain; charset=utf-8',
+        'content-length': String(rejectMessage.length)
+    }
+};
 
 // tslint:disable-next-line: max-line-length
 const endMethod = (incoming: http.IncomingMessage, data: string, response: IResponse, resolve: (response: IResponse) => any): void => {
@@ -51,28 +54,51 @@ export function get(url: string, options?: http.RequestOptions): Promise<IRespon
 
     if (url.slice(0, 5).toLowerCase() === 'https') {
         promise = new Promise<IResponse>((resolve) => {
-            https.get(url, options!, (res) => {
-                res.setEncoding('utf-8');
+            try {
+                https.get(url, options!, (res) => {
+                    res.setEncoding('utf-8');
 
-                res.on('data', (chunk: any) => {
-                    data += chunk;
-                });
+                    res.on('data', (chunk: any) => {
+                        data += chunk;
+                    });
 
-                res.on('end', () => endMethod(res, data, response, resolve));
-            });
+                    res.on('error', () => resolve(rejectResponse));
+                    res.on('end', () => endMethod(res, data, response, resolve));
+                })
+                .on('abort', () => resolve(rejectResponse))
+                .on('error', () => resolve(rejectResponse));
+            }
+            catch (err) {
+                const rr = rejectResponse;
+                rr.data = err.message;
+                rr.headers['content-length'] = err.message.length;
+                resolve(rr);
+            }
         });
     }
     else {
         promise = new Promise<IResponse>((resolve) => {
-            http.get(url, options!, (res) => {
-                res.setEncoding('utf-8');
+            try {
+                http.get(url, options!, (res) => {
+                    res.setEncoding('utf-8');
 
-                res.on('data', (chunk: any) => {
-                    data += chunk;
-                });
+                    res.on('data', (chunk: any) => {
+                        data += chunk;
+                    });
 
-                res.on('end', () => endMethod(res, data, response, resolve));
-            });
+                    // tslint:disable-next-line: no-console
+                    res.on('error', () => resolve( { headers: { "content-length": "0"}, data: {} } ));
+                    res.on('end', () => endMethod(res, data, response, resolve));
+                })
+                .on('abort', () => resolve(rejectResponse))
+                .on('error', () => resolve(rejectResponse));
+            }
+            catch (err) {
+                const rr = rejectResponse;
+                rr.data = err.message;
+                rr.headers['content-length'] = err.message.length;
+                resolve(rr);
+            }
         });
     }
 
