@@ -18,4 +18,4 @@ export default class RejectResponse implements IResponse {
             this.headers['content-length'] = String(error.message.length);
         }
     }
-};
+}

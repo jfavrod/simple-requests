@@ -1,7 +1,7 @@
 import { URL } from 'url';
 import { IRequestOptions } from './interfaces';
 
-export function setOptions(method: string, parsedUrl: URL, options: IRequestOptions) {
+export const setOptions = (method: string, parsedUrl: URL, options: IRequestOptions): void => {
     options.host = parsedUrl.hostname;
     options.method = method;
     options.path = parsedUrl.pathname;
@@ -16,6 +16,6 @@ export function setOptions(method: string, parsedUrl: URL, options: IRequestOpti
     else {
         options.port = 80;
     }
-};
+}
 
 export default setOptions;

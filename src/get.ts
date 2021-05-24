@@ -1,21 +1,21 @@
 import http from 'http';
-import https from 'https';
+import https, { RequestOptions } from 'https';
 
 import endMethod from './endMethod';
 import { IResponse } from './interfaces';
 import RejectResponse from './RejectResponse';
 
-export function get(url: string, options?: http.RequestOptions): Promise<IResponse> {
+export const get = (url: string, options?: RequestOptions): Promise<IResponse> => {
     const response = {} as IResponse;
     let data = '';
     let promise: Promise<IResponse>;
 
-    options = options || [] as http.RequestOptions;
+    options = options || [] as RequestOptions;
 
     if (url.slice(0, 5).toLowerCase() === 'https') {
         promise = new Promise<IResponse>((resolve) => {
             try {
-                https.get(url, options!, (res) => {
+                https.get(url, options as RequestOptions, (res) => {
                     res.setEncoding('utf-8');
 
                     res.on('data', (chunk: any) => {
@@ -37,14 +37,13 @@ export function get(url: string, options?: http.RequestOptions): Promise<IRespon
     else {
         promise = new Promise<IResponse>((resolve) => {
             try {
-                http.get(url, options!, (res) => {
+                http.get(url, options as RequestOptions, (res) => {
                     res.setEncoding('utf-8');
 
                     res.on('data', (chunk: any) => {
                         data += chunk;
                     });
 
-                    // tslint:disable-next-line: no-console
                     res.on('error', () => resolve( { headers: { "content-length": "0"}, data: {} } ));
                     res.on('end', () => endMethod(res, data, response, resolve));
                 })
