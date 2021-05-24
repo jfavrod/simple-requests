@@ -16,7 +16,9 @@ describe('post JSON https', () => {
 
         assert.strictEqual(isIResponse(res), true);
         assert.strictEqual(typeof(res.data), 'object');
-    });
+    })
+    .slow(1234)
+    .timeout(2000);
 });
 
 describe('post URL encoded form data', () => {
@@ -35,5 +37,7 @@ describe('post URL encoded form data', () => {
 
         assert.strictEqual(isIResponse(res), true);
         assert.strictEqual(typeof(res.data), 'object');
-    });
+    })
+    .slow(1234)
+    .timeout(2000);
 });

@@ -1,4 +1,4 @@
-import { IResponse } from './index';
+import { IResponse } from './interfaces';
 
 export function isIResponse(obj: any): obj is IResponse {
     return (

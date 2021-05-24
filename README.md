@@ -60,6 +60,21 @@ interface IResponse {
 }
 ```
 
+**Error Response**
+Error response default to unclassified error, or a JavaScript error message.
+
+```javascript
+{
+  data: 'Unclassified error.',
+  error: true,
+  headers: {
+    date: 'Thu, 28 May 2020 04:20:44 GMT',
+    'content-type': 'text/plain; charset=utf-8',
+    'content-length': '19'
+  }
+}
+```
+
 ### POST Requests
 `post` requests are similar to `get` requests, with the addition of a
 `data` property to the `options` parameter.

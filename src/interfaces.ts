@@ -7,6 +7,7 @@ export interface IOutgoingHeaders extends OutgoingHttpHeaders {
 
 export interface IResponse {
     data: any;
+    error?: boolean;
     headers: http.IncomingHttpHeaders;
 }
 
