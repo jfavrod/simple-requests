@@ -1,8 +1,6 @@
 import { IResponse } from './interfaces';
 
-export function isIResponse(obj: any): obj is IResponse {
-    return (
-        'data' in obj
-        && 'headers' in obj
-    );
-}
+export const isIResponse = (obj: IResponse): obj is IResponse => (
+    'data' in obj
+    && 'headers' in obj
+);
